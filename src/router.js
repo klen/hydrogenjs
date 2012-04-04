@@ -11,8 +11,6 @@ atom.declare('atom.Router', {
         this.settings = atom.Settings(this.settings)
                             .set(settings)
                             .addEvents(this.events);
-
-        this.route();
     },
 
     get current () {
