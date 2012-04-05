@@ -1,2 +1,2 @@
 all:
-	zeta atomvc.js -p compiled. -c
+	zeta hydrogen.js -p compiled. -c
