@@ -8,7 +8,7 @@
         noMatch = /.^/,
         unescape = function(code) { return code.replace(/\\\\/g, '\\').replace(/\\'/g, "'"); };
 
-    atom.declare('atom.Template', {
+    atom.declare('hydrogen.Template', {
 
         tmpl: null,
 

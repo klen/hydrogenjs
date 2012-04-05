@@ -1,4 +1,4 @@
-atom.declare('atom.View', {
+atom.declare('hydrogen.View', {
 
     bindEventsList: 'click contextmenu mouseup mousedown mouseover mouseout'.split(' '),
 

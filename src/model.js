@@ -1,4 +1,4 @@
-atom.declare('atom.Model', {
+atom.declare('hydrogen.Model', {
 
     defaults: {},
     

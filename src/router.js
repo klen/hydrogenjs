@@ -1,4 +1,4 @@
-atom.declare('atom.Router', {
+atom.declare('hydrogen.Router', {
 
     history: [],
 
