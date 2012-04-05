@@ -1,64 +1,64 @@
 atom.declare('atom.View', {
 
-	bindEventsList: 'click contextmenu mouseup mousedown mouseover mouseout'.split(' '),
+    bindEventsList: 'click contextmenu mouseup mousedown mouseover mouseout'.split(' '),
 
-	initialize: function(settings){
-		this.bindMethods( 'eventHandler' );
-	
-		this.events = atom.Events(this);
-		this.settings = atom.Settings(settings).addEvents(this.events);
+    initialize: function(settings){
+        this.bindMethods( 'eventHandler' );
 
-		var el = this.settings.get('el'),
+        this.events = atom.Events(this);
+        this.settings = atom.Settings(settings).addEvents(this.events);
+
+        var el = this.settings.get('el'),
             extend = this.settings.get('extend');
 
-		this.el = el && atom.dom(el);
-		this.bindEvents();
+        this.el = el && atom.dom(el);
+        this.bindEvents();
 
         if (typeof extend === 'object'){
             atom.core.append(this, extend);
         }
-	},
+    },
 
-	create: function(){
+    create: function(){
         this.el && this.unbindEvents();
-		this.el = atom.dom.create.apply(atom.dom, arguments);
-		this.bindEvents();
-		return this;
-	},
+        this.el = atom.dom.create.apply(atom.dom, arguments);
+        this.bindEvents();
+        return this;
+    },
 
-	render: function(){
-		return this;
-	},
+    render: function(){
+        return this;
+    },
 
-	destroy: function(){
+    destroy: function(){
         this.el && this.unbindEvents() && this.el.destroy();
-		return this;
-	},
-	
-	/** @private */
-	eventHandler: function (e) {
-		var view = this;
-		var name = e.type;
-		var targetElem = e.target;
-		
-		this.events.fire(name, [ e, this ]);
-	},
+        return this;
+    },
 
-	/** @private */
-	bindEvents: function(){
-		return this.changeEventsStatus('bind');
-	},
+    /** @private */
+    eventHandler: function (e) {
+        var view = this;
+        var name = e.type;
+        var targetElem = e.target;
 
-	/** @private */
-	unbindEvents: function(){
-		return this.changeEventsStatus('unbind');
-	},
-	
-	/** @private */
-	changeEventsStatus: function (action) {
-		for (var i = this.bindEventsList.length; i--;) {
-			this.el[action](this.bindEventsList[i], this.eventHandler);
-		}
-		return this;
-	}
+        this.events.fire(name, [ e, this ]);
+    },
+
+    /** @private */
+    bindEvents: function(){
+        return this.changeEventsStatus('bind');
+    },
+
+    /** @private */
+    unbindEvents: function(){
+        return this.changeEventsStatus('unbind');
+    },
+
+    /** @private */
+    changeEventsStatus: function (action) {
+        for (var i = this.bindEventsList.length; i--;) {
+            this.el[action](this.bindEventsList[i], this.eventHandler);
+        }
+        return this;
+    }
 });
