@@ -2,90 +2,120 @@ atom.declare('hydrogen.Model', {
 
     parent: hydrogen.Base,
 
-    initialize: function parent (settings){
-        parent.previous.apply(this, arguments);
-        this.configure();
-    },
-
-    get: function(name){
-        return this.settings.get(name);
-    },
-
-    set: function(name, value){
-        this.settings.set(name, value);
-    },
-
-    has: function(name){
-        return this.get(name) !== null;
-    },
-
-    sync: function(){
-        return hydrogen.sync.apply(this, arguments);
-    },
-
-    toJSON: function(options) {
-        return atom.clone(this.settings.values);
-    },
-
-    parse: function(resp, xhr) {
-        return resp;
-    },
-
-    isNew: function() {
-        return this.get('id') === null;
-    },
-
-    save: function(key, value, options) {
-        var attrs, current, model=this, onLoad=options.onLoad;
-
-        if ('key' in key || !key) {
-            attrs = key;
-            options = value;
-        } else {
-            attrs = {};
-            attrs[key] = value;
+    own: {
+        extend: function(proto) {
+            return atom.declare({
+                parent: hydrogen.Model,
+                proto: proto
+            });
         }
-        options = options ? atom.clone(options) : {};
-
-        options.onLoad = function(resp) {
-            var serverAttrs = model.parse(resp);
-            model.set(model.parse(resp));
-            if (onLoad) {
-                onLoad(model, resp);
-            } else {
-                model.fire('sync', [resp, options]);
-            }
-        };
-
-        var method = this.isNew() ? 'create' : 'update';
-        return this.sync(method, this, options);
     },
 
-    destroy: function(options) {
-        var model = this, onLoad = options.onLoad;
+    proto: {
 
-        options = atom.clone(options || {});
+        properties: 'id collection'.split(' '),
 
-        var triggerDestroy = function() {
-            model.fire('destroy', [options]);
-        };
+        idAttribute: 'id',
 
-        if (this.isNew()) {
+        initialize: function parent (settings){
+            parent.previous.apply(this, arguments);
+            this.configure();
+        },
+
+        get id(){ return this.get(this.idAttribute); },
+
+        set id(value){ this.set(this.idAttribute, value); },
+
+        get: function(name){
+            return this.settings.get(name);
+        },
+
+        set: function(name, value){
+            this._id = this.id;
+            this.settings.set(name, value);
+            this.fire('change', [this, this.collection, arguments]);
+        },
+
+        has: function(name){
+            return this.get(name) !== undefined;
+        },
+
+        sync: function(){
+            return hydrogen.sync.apply(this, arguments);
+        },
+
+        toJSON: function() {
+            return atom.clone(this.settings.values);
+        },
+
+        parse: function(resp, xhr) {
+            return resp;
+        },
+
+        isNew: function() {
+            return this.get('id') === undefined;
+        },
+
+        url: function() {
+            var base = this.urlRoot || this.collection.url;
+            if (this.isNew()) { return base; }
+            return base + (base.charAt(base.length - 1) == '/' ? '' : '/') + encodeURIComponent(this.id);
+        },
+
+        save: function(key, value, settings) {
+            var attrs, current, model=this;
+
+            if (key === Object(key) || key === null) {
+                attrs = key;
+                settings = value;
+            } else {
+                attrs = {};
+                attrs[key] = value;
+            }
+            settings = settings ? atom.clone(settings) : {};
+
+            var onLoad = settings.onLoad;
+            settings.onLoad = function(resp) {
+                var serverAttrs = model.parse(resp);
+                model.set(model.parse(resp));
+                if (onLoad) {
+                    onLoad(model, resp);
+                } else {
+                    model.fire('sync', [resp, settings]);
+                }
+            };
+
+            var method = this.isNew() ? 'create' : 'update';
+            return this.sync(method, this, settings);
+        },
+
+        destroy: function(settings) {
+            var model = this;
+
+            settings = atom.clone(settings || {});
+
+            var onLoad = settings.onLoad;
+
+            var triggerDestroy = function() {
+                model.fire('destroy', [model, model.collection, settings]);
+            };
+
+            if (this.isNew()) {
+                triggerDestroy();
+                return false;
+            }
+
+            settings.onLoad = function(resp) {
+                if (onLoad) {
+                    onLoad(model, resp);
+                } else {
+                    model.fire('sync', [resp, settings]);
+                }
+            };
+
+            var xhr = this.sync(method, this, settings);
             triggerDestroy();
-            return false;
+            return xhr;
         }
-
-        options.onLoad = function(resp) {
-            if (onLoad) {
-                onLoad(model, resp);
-            } else {
-                model.fire('sync', [resp, options]);
-            }
-        };
-
-        var xhr = this.sync(method, this, options);
-        triggerDestroy();
-        return xhr;
     }
-
 });

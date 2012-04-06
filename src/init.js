@@ -50,33 +50,39 @@
 
     atom.declare('hydrogen.Base', {
 
-        properties: 'id'.split(' '),
+        proto: {
 
-        initialize: function(settings){
-            this.events = atom.Events(this);
-            this.settings = atom.Settings(this.settings)
-                .set(settings)
-                .addEvents(this.events);
+            properties: 'id'.split(' '),
 
-            this._configure();
-        },
+            initialize: function(settings){
+                this.events = atom.Events(this);
+                this.settings = atom.Settings(this.settings)
+                    .set(settings)
+                    .addEvents(this.events);
 
-        configure: function(){ },
+                this._configure();
+            },
 
-        fire: function(event, args){
-            this.events.fire('all', args);
-            this.events.fire(event, args);
-        },
-        
-        /** @private */
-        _configure: function(){
-            var i=0, l=this.properties.length, attr, value;
-            for (; i<l; i++) {
-                attr = this.properties[i];
-                value = this.settings.get(attr);
-                if (value) { this[attr] = getValue(this, value); }
+            configure: function(){ },
+
+            fire: function(event, args){
+                this.events.fire('all', [event].concat(args));
+                this.events.fire(event, args);
+            },
+            
+            /** @private */
+            _configure: function(){
+                var i=0, l=this.properties.length, attr, value;
+                for (; i<l; i++) {
+                    attr = this.properties[i];
+                    value = this.settings.get(attr);
+                    if (value) {
+                        this[attr] = value;
+                        this[attr] = getValue(this, attr);
+                    }
+                }
+                this.cid = uniqueID(this.constructor.NAME);
             }
-            this.cid = uniqueID(this.constructor.NAME);
         }
 
     });
