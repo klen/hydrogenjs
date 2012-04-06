@@ -1,21 +1,21 @@
 atom.declare('hydrogen.Router', {
 
+    parent: hydrogen.Base,
+
     history: [],
 
-    initialize: function(settings){
+    initialize: function parent (settings){
+
+        parent.previous.apply(this, arguments);
 
         window.addEventListener('hashchange', this.route.bind(this));
-
-        this.events = atom.Events(this);
-
-        this.settings = atom.Settings(this.settings)
-                            .set(settings)
-                            .addEvents(this.events);
     },
 
     get current () {
         return this.history.last;
     },
+
+    set current (value) { },
 
     route: function(){
         var uri = atom.uri();
@@ -33,7 +33,7 @@ atom.declare('hydrogen.Router', {
     },
 
     back: function(){
-        this.history.pop()
+        this.history.pop();
         this.navigate(this.current);
     }
     

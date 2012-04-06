@@ -13,14 +13,11 @@
         tmpl: null,
 
         initialize: function(el, defaults){
-            this.el = atom.dom(el);
-            this.defaults = defaults || {};
-        },
+            var el = typeof el === 'string' ? atom.dom(el) : el,
+                str = el.html();
 
-        compile: function(){
-            var str = this.el.html();
+            this.defaults = defaults || {};
             this.tmpl = this.constructor.compile(str);
-            return this.tmpl;
         },
 
         render: function(data){
@@ -35,25 +32,23 @@
             compile: function(str, data) {
                 var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
                     'with(obj||{}){__p.push(\'' +
-                    str
-                        .replace(/\\/g, '\\\\')
-                        .replace(/'/g, "\\'")
-                        .replace(escape || noMatch, function(match, code) {
-                            return "',_.escape(" + unescape(code) + "),'";
-                        })
-                        .replace(interpolate || noMatch, function(match, code) {
+                    str.replace(/\\/g, '\\\\')
+                       .replace(/'/g, "\\'")
+                       .replace(escape || noMatch, function(match, code) {
+                            return "',hydrogen.escape(" + unescape(code) + "),'";
+                       })
+                       .replace(interpolate || noMatch, function(match, code) {
                             return "'," + unescape(code) + ",'";
-                        })
-                        .replace(evaluate || noMatch, function(match, code) {
+                       })
+                       .replace(evaluate || noMatch, function(match, code) {
                             return "');" + unescape(code).replace(/[\r\n\t]/g, ' ') + ";__p.push('";
-                        })
-                        .replace(/\r/g, '\\r')
-                        .replace(/\n/g, '\\n')
-                        .replace(/\t/g, '\\t')
-                    + "');}return __p.join('');";
-                var func = new Function('obj', '_', tmpl);
-                if (data) return func(data, _);
-                return function(data) { return func.call(this, data, _); };
+                       })
+                       .replace(/\r/g, '\\r')
+                       .replace(/\n/g, '\\n')
+                       .replace(/\t/g, '\\t') + "');}return __p.join('');";
+                var func = new Function('obj', 'hydrogen', tmpl);
+                if (data) { return func(data, hydrogen); }
+                return function(data) { return func.call(this, data, hydrogen); };
             }
         }
     });

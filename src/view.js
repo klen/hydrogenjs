@@ -1,64 +1,73 @@
-atom.declare('hydrogen.View', {
+(function(){
 
-    bindEventsList: 'click contextmenu mouseup mousedown mouseover mouseout'.split(' '),
+    var eventSplitter = /^(\S+)\s*(.*)$/;
+    
+    atom.declare('hydrogen.View', {
 
-    initialize: function(settings){
-        this.bindMethods( 'eventHandler' );
+        parent: hydrogen.Base,
+        
+        properties: 'model collection el id attrs className tagName template'.split(' '),
 
-        this.events = atom.Events(this);
-        this.settings = atom.Settings(settings).addEvents(this.events);
+        template: null,
 
-        var el = this.settings.get('el'),
-            extend = this.settings.get('extend');
+        tagName: 'div',
 
-        this.el = el && atom.dom(el);
-        this.bindEvents();
+        attributes: [],
 
-        if (typeof extend === 'object'){
-            atom.core.append(this, extend);
+        actions: {},
+
+        initialize: function parent (settings){
+
+            parent.previous.apply(this, arguments);
+
+            this.setElement(this.el || atom.dom.create(this.tagName, this.attributes));
+
+            if (this.template !== null){
+                this.template = new hydrogen.Template(this.template);
+            }
+
+            this.configure();
+        },
+
+        configure: function () {
+            return this;
+        },
+
+        render: function(){
+            return this;
+        },
+
+        destroy: function(){
+            this.el.destroy();
+            return this;
+        },
+
+        setElement: function(el){
+            this.el = atom.dom(el);
+            this._bindEvents();
+        },
+
+        find: function(selector){
+            return this.el.find(selector);
+        },
+
+        /** @private */
+        _bindEvents: function(){
+            var method, key, match, name, selector,
+                events=this.actions;
+            for (key in events){
+                method = events[key];
+                if (!atom.core.isFunction(method)) method = this[events[key]];
+                match = key.match(eventSplitter);
+                name = match[1];
+                selector = match[2];
+                if (selector === '') {
+                    this.el.bind(name, method);
+                } else {
+                    this.el.delegate(selector, name, method);
+                }
+            }
         }
-    },
+    });
 
-    create: function(){
-        this.el && this.unbindEvents();
-        this.el = atom.dom.create.apply(atom.dom, arguments);
-        this.bindEvents();
-        return this;
-    },
-
-    render: function(){
-        return this;
-    },
-
-    destroy: function(){
-        this.el && this.unbindEvents() && this.el.destroy();
-        return this;
-    },
-
-    /** @private */
-    eventHandler: function (e) {
-        var view = this;
-        var name = e.type;
-        var targetElem = e.target;
-
-        this.events.fire(name, [ e, this ]);
-    },
-
-    /** @private */
-    bindEvents: function(){
-        return this.changeEventsStatus('bind');
-    },
-
-    /** @private */
-    unbindEvents: function(){
-        return this.changeEventsStatus('unbind');
-    },
-
-    /** @private */
-    changeEventsStatus: function (action) {
-        for (var i = this.bindEventsList.length; i--;) {
-            this.el[action](this.bindEventsList[i], this.eventHandler);
-        }
-        return this;
-    }
-});
+})();
