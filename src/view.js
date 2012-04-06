@@ -12,7 +12,7 @@
 
         tagName: 'div',
 
-        attributes: [],
+        attributes: {},
 
         actions: {},
 
@@ -54,17 +54,18 @@
         /** @private */
         _bindEvents: function(){
             var method, key, match, name, selector,
-                events=this.actions;
-            for (key in events){
-                method = events[key];
-                if (!atom.core.isFunction(method)) method = this[events[key]];
+                actions=this.actions;
+            for (key in actions){
+                method = actions[key];
+                if (!atom.core.isFunction(method)) { method = this[actions[key]]; }
+                if (!method) { continue; }
                 match = key.match(eventSplitter);
                 name = match[1];
                 selector = match[2];
                 if (selector === '') {
-                    this.el.bind(name, method);
+                    this.el.bind(name, method.bind(this));
                 } else {
-                    this.el.delegate(selector, name, method);
+                    this.el.delegate(selector, name, method.bind(this));
                 }
             }
         }
