@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Hydrogen Test Suite</title>
+        <link rel="stylesheet" href="vendor/qunit.css" type="text/css" media="screen" />
+        <script src="vendor/qunit.js"></script>
+        <script src="vendor/jslitmus.js"></script>
+        <script src="vendor/atom.js"></script>
+        <script>
+            QUnit.config.reorder = false;
+        </script>
+
+        <!-- Hydrogen -->
+        <script src="../src/init.js"></script>
+        <script src="../src/model.js"></script>
+        <script src="../src/collection.js"></script>
+        <script src="../src/router.js"></script>
+        <script src="../src/template.js"></script>
+        <script src="../src/view.js"></script>
+
+        <!-- Tests -->
+        <script src="model.js"></script>
+        <script src="collection.js"></script>
+
+    </head>
+    <body>
+        <h1 id="qunit-header">Hydrogen Test Suite</h1>
+        <div id="qunit-testrunner-toolbar"></div>
+        <h2 id="qunit-banner"></h2>
+        <h2 id="qunit-userAgent"></h2>
+        <ol id="qunit-tests"></ol>
+        <br /><br />
+        <h1 id="qunit-header"><a href="#">Hydrogen Speed Suite</a></h1>
+        <div id="jslitmus_container" style="margin: 20px 10px;"></div>
+    </body>
+</html>
+
