@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Hydrogene.js Todos</title>
+  <link rel="stylesheet" href="todos.css"/>
+</head>
+
+<body>
+  
+  <div id="todoapp">
+    
+    <header>
+      <h1>Todos</h1>
+      <input class="new-todo" type="text" placeholder="What needs to be done?">
+    </header>
+
+    <section class="main">
+      <input class="toggle-all" id="toggle-all" type="checkbox">
+      <label for="toggle-all">Mark all as complete</label>
+      <ul class="todo-list"></ul>
+    </section>
+
+    <footer>
+      <a id="clear-completed">Clear completed</a>
+      <div class="todo-count"></div>
+    </footer>
+    
+  </div>
+  
+  <div class="instructions">
+    Double-click to edit a todo.
+  </div>
+  
+  <div class="credits">
+    Created by
+    <br />
+    <a href="http://jgn.me/">J&eacute;r&ocirc;me Gravel-Niquet</a>.
+    <br />Rewritten by: <a href="http://addyosmani.github.com/todomvc">TodoMVC</a>.
+  </div>
+
+  <script src="../../tests/vendor/atom.js"></script>
+
+  <!-- <script src="../../compiled.hydrogen.js"></script> -->
+  <script src="../../src/init.js"></script>
+  <script src="../../src/model.js"></script>
+  <script src="../../src/router.js"></script>
+  <script src="../../src/template.js"></script>
+  <script src="../../src/view.js"></script>
+  <script src="../../src/collection.js"></script>
+
+  <script src="../hydrogen-localstorage.js"></script>
+  <script src="models.js"></script>
+  <script src="views.js"></script>
+  <script> 
+      atom.dom(function(){
+        var app = new Todo.AppView();
+      });
+  </script>
+
+  <!-- Templates -->
+
+  <script type="text/template" id="item-template">
+    <div class="view">
+      <input class="toggle" type="checkbox" <%= done ? 'checked="checked"' : '' %> />
+      <label><%= title %></label>
+      <a class="destroy"></a>
+    </div>
+    <input class="edit" type="text" value="<%= title %>" />
+  </script>
+
+  <script type="text/template" id="stats-template">
+    <% if (done) { %>
+      <a id="clear-completed">Clear <%= done %> completed <%= done == 1 ? 'item' : 'items' %></a>
+    <% } %>
+    <div class="todo-count"><b><%= remaining %></b> <%= remaining == 1 ? 'item' : 'items' %> left</div>
+  </script>
+
+  </body>
+</html>
