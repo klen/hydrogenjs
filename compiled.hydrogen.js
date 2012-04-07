@@ -66,12 +66,8 @@
             configure: function () { },
 
             fire: function (event, args) {
-                console.log(this.cid + '.start.fire ' + event);
                 this.events.fire(event, args);
-                console.log(this.cid + '.end.fire ' + event);
-                console.log(this.cid + '.START.fire all', [event].concat(args));
                 this.events.fire('all', [event].concat(args));
-                console.log(this.cid + '.END.fire all', [event].concat(args));
             },
 
             bind: function (event, listener, context) {
@@ -357,19 +353,14 @@
             },
 
             set: function (name, value, settings) {
-                console.log('model.set.start');
                 var options = settings || {};
                 this._id = this.id;
-                console.log(name, value, settings);
                 this.attrs.set(name, value);
                 if (!options.silent) { this.fire('change', [this, this.collection, arguments]); }
-                console.log('model.set.end');
             },
 
             unset: function (name, settings) {
-                console.log('model.unset.start');
                 this.set(name, null, settings);
-                console.log('model.unset.end');
             },
 
             has: function (name) {
@@ -399,7 +390,6 @@
             },
 
             save: function (key, value, settings) {
-                console.log('model.save');
                 var attrs, current, model = this, onLoad, method;
 
                 if (typeof key === 'object' || key === null) {
@@ -535,7 +525,6 @@
             },
 
             sort: function (settings) {
-                console.log(this.cid + 'sort');
                 settings = settings || {};
                 if (!this.comparator) { throw new Error('Cannot sort a set without a comparator'); }
                 var boundComparator = this.comparator.bind(this);
@@ -545,7 +534,6 @@
             },
 
             add: function (models, settings) {
-                console.log(this.cid + '.add');
                 settings = atom.clone(settings || {});
 
                 var mds = [], index,
@@ -573,7 +561,6 @@
             },
 
             create: function (model, settings) {
-                console.log(this.cid + '.create');
                 settings = atom.clone(settings || {});
 
                 var coll = this, onLoad = settings.onLoad;
@@ -592,7 +579,6 @@
             },
 
             remove: function (models, settings) {
-                console.log(this.cid + '.remove');
                 var i, l, index, model;
                 settings = atom.clone(settings || {});
                 models = atom.isArrayLike(models) ? models.slice() : [models];
@@ -616,7 +602,6 @@
             },
 
             fetch: function (settings) {
-                console.log(this.cid + '.fetch');
                 settings = atom.clone(settings || {});
                 if (settings.parse === undefined) { settings.parse = true; }
 
@@ -631,18 +616,15 @@
             },
 
             parse: function (resp) {
-                console.log(this.cid + '.parse');
                 return resp;
             },
 
             reset: function (models, settings) {
-                console.log(this.cid + '.reset.start');
                 settings = settings || {};
                 this.models.forEach(this._removeReference);
                 this._reset();
                 this.add(models, atom.extend({silent: true}, settings));
                 if (!settings.silent) { this.fire('reset', [models, settings]); }
-                console.log(this.cid + '.reset.end');
             },
 
             /** @private */
@@ -655,7 +637,6 @@
 
             /** @private */
             _prepareModel: function (model, settings) {
-                console.log(this.cid + '.prepare');
                 settings = atom.clone(settings || {});
                 if (!(model instanceof hydrogen.Model)) {
                     var args = model;
@@ -669,7 +650,6 @@
 
             /** @private */
             _onModelEvent: function (event, model, collection, settings) {
-                console.log(this.cid + '.onevent.start', event);
                 if ((event == 'add' || event == 'remove') && collection != this) { return; }
                 if (event == 'destroy') {
                     this.remove(model, settings);
@@ -679,17 +659,14 @@
                     this._byId[model.id] = model;
                 }
                 this.fire(event, [model, collection, settings]);
-                console.log(this.cid + '.onevent.end');
             },
 
             _removeReference: function (model) {
-                console.warn(this.cid + '.remove.reference.start');
                 var _onModelEvent = this._onModelEvent;
                 if (this == model.collection) {
                     delete model.collection;
                 }
                 model.unbind('all', _onModelEvent);
-                console.warn(this.cid + '.remove.reference.end');
             }
         }
     });
