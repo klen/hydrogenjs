@@ -141,6 +141,8 @@ atom.dom(function () {
         router.navigate('search/counter', {trigger: true});
         router.navigate('counter', {trigger: true});
         equal(router.count, 2);
+        hydrogen.history.start();
+        // equal(router.count, 3);
     });
 
     test("Router: use implicit callback if none provided", function () {
@@ -151,7 +153,7 @@ atom.dom(function () {
 
     asyncTest("Router: routes via navigate with {replace: true}", function () {
         var historyLength = window.history.length;
-        router.navigate('search/manhattan/start_here', {replace: true});
+        router.navigate('search/manhattan/start_here');
         router.navigate('search/manhattan/then_here');
         router.navigate('search/manhattan/finally_here', {replace: true});
 
