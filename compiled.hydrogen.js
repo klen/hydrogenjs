@@ -133,6 +133,7 @@
 
         start: function (fragment) {
             this.started = true;
+            this.navigate(atom.uri().anchor, { trigger: true });
             window.addEventListener('hashchange', this._parse);
         },
 
@@ -152,12 +153,15 @@
         navigate: function (fragment, settings) {
             if (!this.started) { return false; }
             var frag = (fragment || '').replace(routeStripper, '');
+            settings = settings || {};
             if (this.history[this.history.length - 1] == frag) { return; }
             this.push(frag);
-            if (settings && settings.replace) {
-                window.location.hash = fragment;
+            if (settings.replace) {
+                location.replace(location.toString().replace(/(javascript:|#).*$/, '') + '#' + frag);
+            } else {
+                location.hash = frag;
             }
-            if (settings && settings.trigger) {
+            if (settings.trigger) {
                 this.loadUrl(fragment);
             }
         },
