@@ -63,12 +63,8 @@
             configure: function () { },
 
             fire: function (event, args) {
-                console.log(this.cid + '.start.fire ' + event);
                 this.events.fire(event, args);
-                console.log(this.cid + '.end.fire ' + event);
-                console.log(this.cid + '.START.fire all', [event].concat(args));
                 this.events.fire('all', [event].concat(args));
-                console.log(this.cid + '.END.fire all', [event].concat(args));
             },
 
             bind: function (event, listener, context) {

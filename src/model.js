@@ -40,19 +40,14 @@
             },
 
             set: function (name, value, settings) {
-                console.log('model.set.start');
                 var options = settings || {};
                 this._id = this.id;
-                console.log(name, value, settings);
                 this.attrs.set(name, value);
                 if (!options.silent) { this.fire('change', [this, this.collection, arguments]); }
-                console.log('model.set.end');
             },
 
             unset: function (name, settings) {
-                console.log('model.unset.start');
                 this.set(name, null, settings);
-                console.log('model.unset.end');
             },
 
             has: function (name) {
@@ -82,7 +77,6 @@
             },
 
             save: function (key, value, settings) {
-                console.log('model.save');
                 var attrs, current, model = this, onLoad, method;
 
                 if (typeof key === 'object' || key === null) {
