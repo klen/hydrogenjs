@@ -207,6 +207,7 @@
                 this.fire(event, [model, collection, settings]);
             },
 
+            /** @private */
             _removeReference: function (model) {
                 var _onModelEvent = this._onModelEvent;
                 if (this == model.collection) {
