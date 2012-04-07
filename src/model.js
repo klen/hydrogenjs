@@ -13,12 +13,16 @@ atom.declare('hydrogen.Model', {
 
     proto: {
 
-        properties: 'id collection'.split(' '),
+        properties: 'collection'.split(' '),
 
         idAttribute: 'id',
 
-        initialize: function parent (settings){
-            parent.previous.apply(this, arguments);
+        initialize: function parent (attrs, settings){
+            parent.previous.call(this, settings);
+
+            this.attrs = new atom.Settings()
+                            .set(this.defaults)
+                            .set(attrs);
             this.configure();
         },
 
@@ -27,13 +31,17 @@ atom.declare('hydrogen.Model', {
         set id(value){ this.set(this.idAttribute, value); },
 
         get: function(name){
-            return this.settings.get(name);
+            return this.attrs.get(name);
         },
 
         set: function(name, value){
             this._id = this.id;
-            this.settings.set(name, value);
+            this.attrs.set(name, value);
             this.fire('change', [this, this.collection, arguments]);
+        },
+
+        unset: function(name){
+            this.set(name, null);
         },
 
         has: function(name){
@@ -45,7 +53,7 @@ atom.declare('hydrogen.Model', {
         },
 
         toJSON: function() {
-            return atom.clone(this.settings.values);
+            return atom.clone(this.attrs.values);
         },
 
         parse: function(resp, xhr) {
@@ -53,13 +61,17 @@ atom.declare('hydrogen.Model', {
         },
 
         isNew: function() {
-            return this.get('id') === undefined;
+            return this.id === undefined || this.id === null;
         },
 
         url: function() {
             var base = this.urlRoot || this.collection.url;
             if (this.isNew()) { return base; }
             return base + (base.charAt(base.length - 1) == '/' ? '' : '/') + encodeURIComponent(this.id);
+        },
+
+        clone: function(){
+            return new this.constructor(this.attrs.values, this.settings.values);
         },
 
         save: function(key, value, settings) {
@@ -72,7 +84,7 @@ atom.declare('hydrogen.Model', {
                 attrs = {};
                 attrs[key] = value;
             }
-            settings = settings ? atom.clone(settings) : {};
+            settings = atom.append({}, settings);
 
             var onLoad = settings.onLoad;
             settings.onLoad = function(resp) {
@@ -92,7 +104,7 @@ atom.declare('hydrogen.Model', {
         destroy: function(settings) {
             var model = this;
 
-            settings = atom.clone(settings || {});
+            settings = atom.append({}, settings);
 
             var onLoad = settings.onLoad;
 
@@ -113,7 +125,7 @@ atom.declare('hydrogen.Model', {
                 }
             };
 
-            var xhr = this.sync(method, this, settings);
+            var xhr = this.sync('delete', this, settings);
             triggerDestroy();
             return xhr;
         }

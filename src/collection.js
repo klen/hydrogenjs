@@ -19,10 +19,11 @@ atom.declare('hydrogen.Collection', {
 
         initialize: function parent (settings){
 
-            this.bindMethods('_onModelEvent');
+            this.bindMethods('_onModelEvent', '_removeReference');
 
             parent.previous.apply(this, arguments);
 
+            this.models = [];
             this.reset(this.settings.get('models') || [], settings);
             this.configure();
         },
@@ -68,16 +69,16 @@ atom.declare('hydrogen.Collection', {
         },
 
         add: function(models, settings){
-            settings = settings || {};
+            settings = atom.append({}, settings);
 
             var mds = [], index,
                 _byId = this._byId, _byCid = this._byCid, col=this,
                 _onModelEvent = this._onModelEvent,
-                prepareModel = this._prepareModel.bind(this);
+                _prepareModel = this._prepareModel.bind(this);
 
             models = atom.isArrayLike(models) ? models.slice() : [models];
             models.forEach(function(model){
-                model = prepareModel(model);
+                model = _prepareModel(model);
                 model.events.add('all', _onModelEvent);
                 if (!_byId[model.id] && !_byCid[model.cid]){ 
                     _byCid[model.cid] = model;
@@ -89,13 +90,14 @@ atom.declare('hydrogen.Collection', {
             Array.prototype.splice.apply(this.models, [index, 0].concat(mds));
             mds.forEach(function(model){
                 settings.index = index++;
-                model.fire('add', [model, col, settings]); });
+                settings.silent || model.fire('add', [model, col, settings]); });
             return this;
         },
 
         create: function(model, settings) {
+            settings = atom.append({}, settings);
+
             var coll = this;
-            settings = settings ? atom.clone(settings) : {};
             model = this._prepareModel(model, settings);
             if (!model) return false;
             this.add(model, settings);
@@ -129,7 +131,7 @@ atom.declare('hydrogen.Collection', {
         },
 
         fetch: function(settings) {
-            settings = settings ? atom.clone(settings) : {};
+            settings = atom.append({}, settings);
             if (settings.parse === undefined) { settings.parse = true; }
 
             var collection = this;
@@ -151,9 +153,11 @@ atom.declare('hydrogen.Collection', {
         },
 
         reset: function(models, settings){
+            settings = settings || {}
+            this.models.forEach(this._removeReference);
             this._reset();
-            this.add(models, settings);
-            this.fire('reset', arguments);
+            this.add(models, atom.extend({silent: true}, settings));
+            settings.silent || this.fire('reset', arguments);
         },
 
         /** @private */
@@ -166,7 +170,7 @@ atom.declare('hydrogen.Collection', {
 
         /** @private */
         _prepareModel: function(model, settings) {
-            settings = settings || {};
+            settings = atom.append({}, settings);
             if (!(model instanceof hydrogen.Model)) {
                 var attrs = model;
                 settings.collection = this;

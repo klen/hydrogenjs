@@ -56,18 +56,17 @@
 
             initialize: function(settings){
                 this.events = atom.Events(this);
-                this.settings = atom.Settings(this.settings)
+                this.settings = atom.Settings()
                     .set(settings)
                     .addEvents(this.events);
-
                 this._configure();
             },
 
             configure: function(){ },
 
             fire: function(event, args){
-                this.events.fire('all', [event].concat(args));
                 this.events.fire(event, args);
+                this.events.fire('all', [event].concat(args));
             },
             
             /** @private */
