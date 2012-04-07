@@ -2236,14 +2236,14 @@ var Events = declare( 'atom.Events',
 	removeOne: function (name, callback) {
 		name = this.removeOn( name );
 
-		if (this.locked.indexOf(name) == -1) {
-			var events = this.events[name], i = events.length;
-			while (i--) if (events[i] == callback) {
-				events.splice(i, 1);
-			}
-		} else {
-			this.register(name, 'removeOne', callback);
-		}
+        if (this.locked.indexOf(name) == -1) {
+            var events = this.events[name], i = events.length;
+            while (i--) if (events[i] == callback) {
+                events.splice(i, 1);
+            }
+        } else {
+            this.register(name, 'removeOne', callback);
+        }
 	}
 });
 
