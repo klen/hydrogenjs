@@ -147,7 +147,7 @@ body {
 	border-radius: 0 0 5px 5px;
 }
 
-#clear-completed {
+.clear-completed {
 	float: right;
 	line-height: 20px;
 	text-decoration: none;
@@ -170,7 +170,7 @@ body {
 	box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 0 0;
 }
 
-#clear-completed:hover {
+.clear-completed:hover {
 	background: rgba(0, 0, 0, 0.15);
 	-webkit-box-shadow: rgba(0, 0, 0, 0.3) 0 -1px 0 0;
 	-moz-box-shadow: rgba(0, 0, 0, 0.3) 0 -1px 0 0;
@@ -179,7 +179,7 @@ body {
 	box-shadow: rgba(0, 0, 0, 0.3) 0 -1px 0 0;
 }
 
-#clear-completed:active {
+.clear-completed:active {
 	position: relative;
 	top: 1px;
 }

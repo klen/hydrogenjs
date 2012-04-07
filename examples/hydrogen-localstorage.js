@@ -12,16 +12,18 @@ atom.declare('hydrogen.Store', {
     },
 
     create: function(model) {
-        if (!model.id) model.id = this.constructor.guid();
+        if (!model.id) model.set('id', this.constructor.guid(), {
+            silent: true
+        });
         this.data[model.id] = model;
         this.save();
-        return model;
+        return model.toJSON();
     },
 
     update: function(model) {
         this.data[model.id] = model;
         this.save();
-        return model;
+        return model.toJSON();
     },
 
     find: function(model) {
