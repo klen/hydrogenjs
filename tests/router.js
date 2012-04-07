@@ -87,10 +87,11 @@ atom.dom(function () {
             router.events.add('all', onRoute);
             lastRoute = null;
             lastArgs = [];
+            hydrogen.history.start();
         },
 
         teardown: function () {
-            router.fire('stop');
+            hydrogen.history.stop();
             window.location.hash = '';
         }
 
@@ -136,6 +137,29 @@ atom.dom(function () {
         router.navigate('search/counter', {trigger: true});
         router.navigate('counter', {trigger: true});
         equal(router.count, 2);
+        hydrogen.history.stop();
+        router.navigate('search/counter', {trigger: true});
+        router.navigate('counter', {trigger: true});
+        equal(router.count, 2);
     });
 
+    test("Router: use implicit callback if none provided", function () {
+        router.count = 0;
+        router.navigate('implicit', {trigger: true});
+        equal(router.count, 1);
+    });
+
+    asyncTest("Router: routes via navigate with {replace: true}", function () {
+        var historyLength = window.history.length;
+        router.navigate('search/manhattan/start_here', {replace: true});
+        router.navigate('search/manhattan/then_here');
+        router.navigate('search/manhattan/finally_here', {replace: true});
+
+        equal(window.location.hash, "#search/manhattan/finally_here");
+        window.history.go(-1);
+        setTimeout(function () {
+            equal(window.location.hash, "#search/manhattan/start_here");
+            start();
+        }, 500);
+    });
 });
