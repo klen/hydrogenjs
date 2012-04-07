@@ -1,23 +1,24 @@
-(function(){
+(function () {
+    "use strict";
 
     var eventSplitter = /^(\S+)\s*(.*)$/;
-    
+
     atom.declare('hydrogen.View', {
 
         parent: hydrogen.Base,
 
         own: {
-            extend: function(proto) {
+            extend: function (proto) {
                 return atom.declare({
-                    parent: hydrogen.View,
+                    parent: hydrogen.Collection,
                     proto: proto
                 });
             }
         },
-        
+
         proto: {
 
-            properties: 'model collection el id attrs className tagName template'.split(' '),
+            properties: ['model', 'collection', ' el', 'id', 'attrs', 'className', 'tagName', 'template'],
 
             template: null,
 
@@ -27,13 +28,13 @@
 
             actions: {},
 
-            initialize: function parent (settings){
+            initialize: function parent(settings) {
 
                 parent.previous.apply(this, arguments);
 
                 this.setElement(this.el || atom.dom.create(this.tagName, this.attributes));
 
-                if (this.template !== null){
+                if (this.template !== null) {
                     this.template = new hydrogen.Template(this.template);
                 }
 
@@ -44,29 +45,29 @@
                 return this;
             },
 
-            render: function(){
+            render: function () {
                 return this;
             },
 
-            destroy: function(){
+            destroy: function () {
                 this.el.destroy();
                 return this;
             },
 
-            setElement: function(el){
+            setElement: function (el) {
                 this.el = atom.dom(el);
                 this._bindEvents();
             },
 
-            find: function(selector){
+            find: function (selector) {
                 return this.el.find(selector);
             },
 
             /** @private */
-            _bindEvents: function(){
+            _bindEvents: function () {
                 var method, key, match, name, selector,
-                    actions=this.actions;
-                for (key in actions){
+                    actions = this.actions;
+                for (key in actions) {
                     method = actions[key];
                     if (!atom.core.isFunction(method)) { method = this[actions[key]]; }
                     if (!method) { continue; }
@@ -83,4 +84,4 @@
         }
     });
 
-})();
+}());
