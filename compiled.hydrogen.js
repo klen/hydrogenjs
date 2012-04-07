@@ -59,18 +59,17 @@
 
             initialize: function(settings){
                 this.events = atom.Events(this);
-                this.settings = atom.Settings(this.settings)
+                this.settings = atom.Settings()
                     .set(settings)
                     .addEvents(this.events);
-
                 this._configure();
             },
 
             configure: function(){ },
 
             fire: function(event, args){
-                this.events.fire('all', [event].concat(args));
                 this.events.fire(event, args);
+                this.events.fire('all', [event].concat(args));
             },
             
             /** @private */
@@ -304,12 +303,16 @@ atom.declare('hydrogen.Model', {
 
     proto: {
 
-        properties: 'id collection'.split(' '),
+        properties: 'collection'.split(' '),
 
         idAttribute: 'id',
 
-        initialize: function parent (settings){
-            parent.previous.apply(this, arguments);
+        initialize: function parent (attrs, settings){
+            parent.previous.call(this, settings);
+
+            this.attrs = new atom.Settings()
+                            .set(this.defaults)
+                            .set(attrs);
             this.configure();
         },
 
@@ -318,13 +321,17 @@ atom.declare('hydrogen.Model', {
         set id(value){ this.set(this.idAttribute, value); },
 
         get: function(name){
-            return this.settings.get(name);
+            return this.attrs.get(name);
         },
 
         set: function(name, value){
             this._id = this.id;
-            this.settings.set(name, value);
+            this.attrs.set(name, value);
             this.fire('change', [this, this.collection, arguments]);
+        },
+
+        unset: function(name){
+            this.set(name, null);
         },
 
         has: function(name){
@@ -336,7 +343,7 @@ atom.declare('hydrogen.Model', {
         },
 
         toJSON: function() {
-            return atom.clone(this.settings.values);
+            return atom.clone(this.attrs.values);
         },
 
         parse: function(resp, xhr) {
@@ -344,13 +351,17 @@ atom.declare('hydrogen.Model', {
         },
 
         isNew: function() {
-            return this.get('id') === undefined;
+            return this.id === undefined || this.id === null;
         },
 
         url: function() {
             var base = this.urlRoot || this.collection.url;
             if (this.isNew()) { return base; }
             return base + (base.charAt(base.length - 1) == '/' ? '' : '/') + encodeURIComponent(this.id);
+        },
+
+        clone: function(){
+            return new this.constructor(this.attrs.values, this.settings.values);
         },
 
         save: function(key, value, settings) {
@@ -363,7 +374,7 @@ atom.declare('hydrogen.Model', {
                 attrs = {};
                 attrs[key] = value;
             }
-            settings = settings ? atom.clone(settings) : {};
+            settings = atom.append({}, settings);
 
             var onLoad = settings.onLoad;
             settings.onLoad = function(resp) {
@@ -383,7 +394,7 @@ atom.declare('hydrogen.Model', {
         destroy: function(settings) {
             var model = this;
 
-            settings = atom.clone(settings || {});
+            settings = atom.append({}, settings);
 
             var onLoad = settings.onLoad;
 
@@ -404,7 +415,7 @@ atom.declare('hydrogen.Model', {
                 }
             };
 
-            var xhr = this.sync(method, this, settings);
+            var xhr = this.sync('delete', this, settings);
             triggerDestroy();
             return xhr;
         }
@@ -435,10 +446,11 @@ atom.declare('hydrogen.Collection', {
 
         initialize: function parent (settings){
 
-            this.bindMethods('_onModelEvent');
+            this.bindMethods('_onModelEvent', '_removeReference');
 
             parent.previous.apply(this, arguments);
 
+            this.models = [];
             this.reset(this.settings.get('models') || [], settings);
             this.configure();
         },
@@ -484,16 +496,16 @@ atom.declare('hydrogen.Collection', {
         },
 
         add: function(models, settings){
-            settings = settings || {};
+            settings = atom.append({}, settings);
 
             var mds = [], index,
                 _byId = this._byId, _byCid = this._byCid, col=this,
                 _onModelEvent = this._onModelEvent,
-                prepareModel = this._prepareModel.bind(this);
+                _prepareModel = this._prepareModel.bind(this);
 
             models = atom.isArrayLike(models) ? models.slice() : [models];
             models.forEach(function(model){
-                model = prepareModel(model);
+                model = _prepareModel(model);
                 model.events.add('all', _onModelEvent);
                 if (!_byId[model.id] && !_byCid[model.cid]){ 
                     _byCid[model.cid] = model;
@@ -505,13 +517,14 @@ atom.declare('hydrogen.Collection', {
             Array.prototype.splice.apply(this.models, [index, 0].concat(mds));
             mds.forEach(function(model){
                 settings.index = index++;
-                model.fire('add', [model, col, settings]); });
+                settings.silent || model.fire('add', [model, col, settings]); });
             return this;
         },
 
         create: function(model, settings) {
+            settings = atom.append({}, settings);
+
             var coll = this;
-            settings = settings ? atom.clone(settings) : {};
             model = this._prepareModel(model, settings);
             if (!model) return false;
             this.add(model, settings);
@@ -545,7 +558,7 @@ atom.declare('hydrogen.Collection', {
         },
 
         fetch: function(settings) {
-            settings = settings ? atom.clone(settings) : {};
+            settings = atom.append({}, settings);
             if (settings.parse === undefined) { settings.parse = true; }
 
             var collection = this;
@@ -567,9 +580,11 @@ atom.declare('hydrogen.Collection', {
         },
 
         reset: function(models, settings){
+            settings = settings || {}
+            this.models.forEach(this._removeReference);
             this._reset();
-            this.add(models, settings);
-            this.fire('reset', arguments);
+            this.add(models, atom.extend({silent: true}, settings));
+            settings.silent || this.fire('reset', arguments);
         },
 
         /** @private */
@@ -582,7 +597,7 @@ atom.declare('hydrogen.Collection', {
 
         /** @private */
         _prepareModel: function(model, settings) {
-            settings = settings || {};
+            settings = atom.append({}, settings);
             if (!(model instanceof hydrogen.Model)) {
                 var attrs = model;
                 settings.collection = this;
