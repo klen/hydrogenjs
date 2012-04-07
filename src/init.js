@@ -1,3 +1,5 @@
+/*global atom, hydrogen, console */
+
 (function (atom) {
     "use strict";
 
@@ -61,10 +63,28 @@
             configure: function () { },
 
             fire: function (event, args) {
-                console.log(this + ' start.fire ' + event);
+                console.log(this.cid + '.start.fire ' + event);
                 this.events.fire(event, args);
+                console.log(this.cid + '.end.fire ' + event);
+                console.log(this.cid + '.START.fire all', [event].concat(args));
                 this.events.fire('all', [event].concat(args));
-                console.log(this + ' end.fire ' + event);
+                console.log(this.cid + '.END.fire all', [event].concat(args));
+            },
+
+            bind: function (event, listener, context) {
+                if (context !== undefined) {
+                    this.events.add(event, listener.bind(context));
+                } else {
+                    this.events.add(event, listener);
+                }
+            },
+
+            unbind: function (event, listener) {
+                this.events.remove(event, listener);
+            },
+
+            sync: function () {
+                return hydrogen.sync.apply(this, arguments);
             },
 
             /** @private */
@@ -79,15 +99,8 @@
                     }
                 }
                 this.cid = uniqueID(this.constructor.NAME);
-            },
-
-            sync: function () {
-                console.log('base.sync');
-                return hydrogen.sync.apply(this, arguments);
-            },
-
+            }
         }
-
     });
 
 }(atom));

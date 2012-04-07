@@ -1,3 +1,5 @@
+/*global atom, hydrogen, console */
+
 (function () {
     "use strict";
 
@@ -83,12 +85,15 @@
                 console.log('model.save');
                 var attrs, current, model = this, onLoad, method;
 
-                if (key === {}(key) || key === null) {
+                if (typeof key === 'object' || key === null) {
                     attrs = key;
                     settings = value;
                 } else {
                     attrs = {};
                     attrs[key] = value;
+                }
+                if (attrs) {
+                    this.set(attrs);
                 }
                 settings = atom.clone(settings || {});
                 onLoad = settings.onLoad;

@@ -1,3 +1,5 @@
+/*global atom, hydrogen, console */
+
 (function () {
     "use strict";
 

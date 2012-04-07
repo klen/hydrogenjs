@@ -1,4 +1,6 @@
 // JavaScript micro-templating, similar to John Resig's implementation.
+//
+/*global atom, hydrogen, console */
 
 (function (atom) {
     "use strict";

@@ -1,3 +1,5 @@
+/*global atom, hydrogen, console */
+
 (function () {
     "use strict";
 
@@ -20,14 +22,14 @@
 
             model: hydrogen.Model,
 
-            initialize: function parent(settings) {
+            initialize: function parent(models, settings) {
 
-                this.bindMethods('_onModelEvent', '_removeReference');
+                this.bindMethods(['_onModelEvent', '_removeReference']);
 
-                parent.previous.apply(this, arguments);
+                parent.previous.call(this, settings);
 
                 this.models = [];
-                this.reset(this.settings.get('models') || [], settings);
+                this.reset(models || [], settings);
                 this.configure();
             },
 
@@ -69,7 +71,7 @@
             },
 
             sort: function (settings) {
-                console.log(this + 'sort');
+                console.log(this.cid + 'sort');
                 settings = settings || {};
                 if (!this.comparator) { throw new Error('Cannot sort a set without a comparator'); }
                 var boundComparator = this.comparator.bind(this);
@@ -79,7 +81,7 @@
             },
 
             add: function (models, settings) {
-                console.log('collection.add');
+                console.log(this.cid + '.add');
                 settings = atom.clone(settings || {});
 
                 var mds = [], index,
@@ -90,7 +92,7 @@
                 models = atom.isArrayLike(models) ? models.slice() : [models];
                 models.forEach(function (model) {
                     model = _prepareModel(model);
-                    model.events.add('all', _onModelEvent);
+                    model.bind('all', _onModelEvent);
                     if (!_byId[model.id] && !_byCid[model.cid]) {
                         _byCid[model.cid] = model;
                         if (model.id != null) { _byId[model.id] = model; }
@@ -107,7 +109,7 @@
             },
 
             create: function (model, settings) {
-                console.log('collection.create');
+                console.log(this.cid + '.create');
                 settings = atom.clone(settings || {});
 
                 var coll = this, onLoad = settings.onLoad;
@@ -126,9 +128,9 @@
             },
 
             remove: function (models, settings) {
-                console.log('collection.remove');
+                console.log(this.cid + '.remove');
                 var i, l, index, model;
-                settings = settings || {};
+                settings = atom.clone(settings || {});
                 models = atom.isArrayLike(models) ? models.slice() : [models];
                 for (i = 0, l = models.length; i < l; i++) {
                     model = this.getByCid(models[i]) || this.get(models[i]);
@@ -137,14 +139,20 @@
                     delete this._byCid[model.cid];
                     index = this.models.indexOf(model);
                     this.models.splice(index, 1);
-                    this.length--;
+                    if (!settings.silent) {
+                        settings.index = index;
+
+                        // Not fire 'all' event here
+                        model.events.fire('remove', [model, this, settings]);
+                        this.fire('remove', [model, this, settings]);
+                    }
                     this._removeReference(model);
                 }
                 return this;
             },
 
             fetch: function (settings) {
-                console.log('collection.fetch');
+                console.log(this.cid + '.fetch');
                 settings = atom.clone(settings || {});
                 if (settings.parse === undefined) { settings.parse = true; }
 
@@ -159,18 +167,18 @@
             },
 
             parse: function (resp) {
-                console.log('collection.parse');
+                console.log(this.cid + '.parse');
                 return resp;
             },
 
             reset: function (models, settings) {
-                console.log('collection.reset.start');
+                console.log(this.cid + '.reset.start');
                 settings = settings || {};
                 this.models.forEach(this._removeReference);
                 this._reset();
                 this.add(models, atom.extend({silent: true}, settings));
                 if (!settings.silent) { this.fire('reset', [models, settings]); }
-                console.log('collection.reset.end');
+                console.log(this.cid + '.reset.end');
             },
 
             /** @private */
@@ -183,7 +191,7 @@
 
             /** @private */
             _prepareModel: function (model, settings) {
-                console.log('collection.prepare');
+                console.log(this.cid + '.prepare');
                 settings = atom.clone(settings || {});
                 if (!(model instanceof hydrogen.Model)) {
                     var args = model;
@@ -197,7 +205,7 @@
 
             /** @private */
             _onModelEvent: function (event, model, collection, settings) {
-                console.log('collection.onevent.start', event);
+                console.log(this.cid + '.onevent.start', event);
                 if ((event == 'add' || event == 'remove') && collection != this) { return; }
                 if (event == 'destroy') {
                     this.remove(model, settings);
@@ -207,14 +215,17 @@
                     this._byId[model.id] = model;
                 }
                 this.fire(event, [model, collection, settings]);
-                console.log('collection.onevent.end');
+                console.log(this.cid + '.onevent.end');
             },
 
             _removeReference: function (model) {
+                console.warn(this.cid + '.remove.reference.start');
+                var _onModelEvent = this._onModelEvent;
                 if (this == model.collection) {
                     delete model.collection;
                 }
-                model.events.remove('all', this._onModelEvent);
+                model.unbind('all', _onModelEvent);
+                console.warn(this.cid + '.remove.reference.end');
             }
         }
     });
