@@ -240,7 +240,7 @@
 
         proto: {
 
-            properties: ['model', 'collection', ' el', 'id', 'attrs', 'className', 'tagName', 'template'],
+            properties: ['model', 'collection', 'el', 'id', 'attrs', 'className', 'tagName', 'template'],
 
             template: null,
 
