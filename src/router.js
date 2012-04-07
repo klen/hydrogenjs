@@ -1,40 +1,43 @@
-atom.declare('hydrogen.Router', {
+(function () {
+    "use strict";
 
-    parent: hydrogen.Base,
+    atom.declare('hydrogen.Router', {
 
-    history: [],
+        parent: hydrogen.Base,
 
-    initialize: function parent (settings){
+        history: [],
 
-        parent.previous.apply(this, arguments);
+        initialize: function parent(settings) {
 
-        window.addEventListener('hashchange', this.route.bind(this));
-    },
+            parent.previous.apply(this, arguments);
 
-    get current () {
-        return this.history.last;
-    },
+            window.addEventListener('hashchange', this.route.bind(this));
+        },
 
-    set current (value) { },
+        get current () {
+            return this.history.last;
+        },
 
-    route: function(){
-        var uri = atom.uri();
+        set current (value) { throw "Not allowed."; },
 
-        this.history.push(uri.anchor);
-        this.events.fire(uri.anchor);
-    },
+        route: function () {
+            var uri = atom.uri();
 
-    navigate: function(name){
-        if (this.current == name){
-            return false;
+            this.history.push(uri.anchor);
+            this.events.fire(uri.anchor);
+        },
+
+        navigate: function (name) {
+            if (this.current == name) {
+                return false;
+            }
+            var base = window.location.href.split('#')[0];
+            window.location.href = base + '#' + name;
+        },
+
+        back: function () {
+            this.history.pop();
+            this.navigate(this.current);
         }
-        var base = window.location.href.split('#')[0];
-        window.location.href = base + '#' + name;
-    },
-
-    back: function(){
-        this.history.pop();
-        this.navigate(this.current);
-    }
-    
-});
+    });
+}());
