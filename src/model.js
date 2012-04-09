@@ -7,14 +7,14 @@
 
         parent: hydrogen.Base,
 
-        own: {
-            extend: function (proto) {
-                return atom.declare({
-                    parent: hydrogen.Model,
-                    proto: proto
-                });
-            }
-        },
+        // own: {
+            // extend: function (proto) {
+                // return atom.declare({
+                    // parent: hydrogen.Model,
+                    // proto: proto
+                // });
+            // }
+        // },
 
         proto: {
 
