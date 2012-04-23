@@ -121,4 +121,20 @@ atom.dom(function () {
         model.save('title', 'Twelfth Night');
         equal(model.get('title'), 'Twelfth Night');
     });
+
+    test("Model: fetch", function () {
+        doc.fetch();
+        equal(lastRequest.method, 'read');
+        ok(lastRequest.model ==  doc);
+    });
+
+    test("Model: destroy", function () {
+        doc.destroy();
+        equal(lastRequest.method, 'delete');
+        ok(lastRequest.model ==  doc);
+
+        var newModel = new hydrogen.Model();
+        equal(newModel.destroy(), false);
+    });
+
 });

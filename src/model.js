@@ -104,6 +104,19 @@
                 return this.sync(method, this, settings);
             },
 
+            fetch: function (settings) {
+                settings = settings ? atom.clone(settings) : {};
+                var model = this,
+                    onLoad = settings.onLoad;
+
+                settings.onLoad = function (resp) {
+                    if (!model.set(model.parse(resp), settings)) { return false; }
+                    if (onLoad) { onLoad(model, resp); }
+                };
+                return this.sync('read', this, settings);
+            },
+
+
             destroy: function (settings) {
                 var model = this, onLoad, triggerDestroy, xhr;
 
