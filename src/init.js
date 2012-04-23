@@ -52,7 +52,7 @@
             extend: function (proto) {
                 return atom.declare({
                     parent: this,
-                    proto: proto
+                    proto: proto || {}
                 });
             }
         },

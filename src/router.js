@@ -12,7 +12,7 @@
         };
 
     atom.declare('hydrogen._History', {
-        
+
         history: [],
 
         routes: [],
