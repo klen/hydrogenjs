@@ -7,15 +7,6 @@
 
         parent: hydrogen.Base,
 
-        // own: {
-            // extend: function (proto) {
-                // return atom.declare({
-                    // parent: hydrogen.Collection,
-                    // proto: proto
-                // });
-            // }
-        // },
-
         proto: {
 
             properties: ['id', 'model', 'comparator', 'url'],

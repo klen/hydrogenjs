@@ -9,15 +9,6 @@
 
         parent: hydrogen.Base,
 
-        // own: {
-            // extend: function (proto) {
-                // return atom.declare({
-                    // parent: hydrogen.Collection,
-                    // proto: proto
-                // });
-            // }
-        // },
-
         proto: {
 
             properties: ['model', 'collection', 'el', 'id', 'attrs', 'className', 'tagName', 'template'],
