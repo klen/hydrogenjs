@@ -103,7 +103,6 @@ atom.dom(function () {
         });
         col.events.add('add', function (model, collection, options) {
             added = model.get('label');
-            console.log(options);
             equal(options.index, 4);
             opts = options;
         });

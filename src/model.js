@@ -7,15 +7,6 @@
 
         parent: hydrogen.Base,
 
-        // own: {
-            // extend: function (proto) {
-                // return atom.declare({
-                    // parent: hydrogen.Model,
-                    // proto: proto
-                // });
-            // }
-        // },
-
         proto: {
 
             properties: ['collection'],
@@ -25,9 +16,13 @@
             initialize: function parent(attrs, settings) {
                 parent.previous.call(this, settings);
 
+                var parse = this.settings.get('parse');
+                if (parse) { attrs = this.parse(attrs); }
+
                 this.attrs = new atom.Settings()
                                 .set(this.defaults)
                                 .set(attrs);
+
                 this.configure();
             },
 
@@ -40,10 +35,29 @@
             },
 
             set: function (name, value, settings) {
-                var options = settings || {};
+                var a, options = settings || {},
+                    attrs = atom.core.objectize(name, value),
+                    changes = options.changes = {};
+
+                if (!this._validate(attrs, options)) {
+                    return false;
+                }
+
                 this._id = this.id;
-                this.attrs.set(name, value);
-                if (!options.silent) { this.fire('change', [this, this.collection, arguments]); }
+
+                Object.map(attrs, function (v, k) {
+                    if (v != this.get(k)) {
+                        changes[k] = v;
+                    }
+                }.bind(this));
+
+                this.attrs.set(attrs);
+
+                if (!options.silent) {
+                    for (a in changes) { this.events.fire('change:' + a, [this, this.get(a), options]); }
+                    this.fire('change', [this, this.collection, attrs]);
+                }
+                return this;
             },
 
             unset: function (name, settings) {
@@ -51,7 +65,12 @@
             },
 
             has: function (name) {
-                return this.get(name) !== undefined;
+                return this.get(name) !== undefined && this.get(name) !== null;
+            },
+
+            escape: function (attr) {
+                var val = this.get(attr);
+                return hydrogen.escape(val == null ? '' : val.toString());
             },
 
             toJSON: function () {
@@ -116,7 +135,6 @@
                 return this.sync('read', this, settings);
             },
 
-
             destroy: function (settings) {
                 var model = this, onLoad, triggerDestroy, xhr;
 
@@ -144,6 +162,19 @@
                 xhr = this.sync('delete', this, settings);
                 triggerDestroy();
                 return xhr;
+            },
+
+            _validate: function (attrs, settings) {
+                if (settings.silent || !this.validate) { return true; }
+                attrs = atom.core.append(atom.clone(this.attrs.values), attrs);
+                var error = this.validate(attrs, settings);
+                if (!error) { return true; }
+                if (settings && settings.error) {
+                    settings.error(this, error, settings);
+                } else {
+                    this.fire('error', [this, error, settings]);
+                }
+                return false;
             }
         }
     });

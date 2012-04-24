@@ -1,4 +1,4 @@
-/*global atom, hydrogen, console, module, test, equal, raises, ok */
+/*global atom, hydrogen, console, module, test, equal, raises, ok, expect */
 
 atom.dom(function () {
     "use strict";
@@ -54,6 +54,27 @@ atom.dom(function () {
         equal(model.collection.cid, collection.cid);
     });
 
+    test("Model: initialize with attributes and options", function () {
+        var Model = hydrogen.Model.extend({
+            configure: function () {
+                this.one = this.settings.get('one');
+            }
+        }),
+            model = new Model({}, {one: 1});
+        equal(model.one, 1);
+    });
+
+    test("Model: initialize with parsed attributes", function () {
+        var Model = hydrogen.Model.extend({
+            parse: function (obj) {
+                obj.value += 1;
+                return obj;
+            }
+        }),
+            model = new Model({value: 1}, {parse: true});
+        equal(model.get('value'), 2);
+    });
+
     test("Model: url", function () {
         doc.urlRoot = null;
         equal(doc.url(), '/collection/1-the-tempest');
@@ -93,6 +114,66 @@ atom.dom(function () {
     test("Model: get", function () {
         equal(doc.get('title'), 'The Tempest');
         equal(doc.get('author'), 'Bill Shakespeare');
+    });
+
+    test("Model: escape", function () {
+        equal(doc.escape('title'), 'The Tempest');
+        doc.set({audience: 'Bill & Bob'});
+        equal(doc.escape('audience'), 'Bill &amp; Bob');
+        doc.set({audience: 'Tim > Joan'});
+        equal(doc.escape('audience'), 'Tim &gt; Joan');
+        doc.set({audience: 10101});
+        equal(doc.escape('audience'), '10101');
+        doc.unset('audience');
+        equal(doc.escape('audience'), '');
+    });
+
+    test("Model: has", function () {
+        var a = new hydrogen.Model();
+        equal(a.has("name"), false);
+        [true, "Truth!", 1, false, '', 0].forEach(function (value) {
+            a.set({'name': value});
+            equal(a.has("name"), true);
+        });
+        a.unset('name');
+        equal(a.has('name'), false);
+        [null, undefined].forEach(function (value) {
+            a.set({'name': value});
+            equal(a.has("name"), false);
+        });
+    });
+
+    test("Model: set and unset", function () {
+        expect(8);
+        var a = new hydrogen.Model({id: 'id', foo: 1, bar: 2, baz: 3}),
+            changeCount = 0;
+        a.bind("change:foo", function () { changeCount += 1; });
+        a.set({'foo': 2});
+        ok(a.get('foo') == 2, "Foo should have changed.");
+        ok(changeCount == 1, "Change count should have incremented.");
+        a.set({'foo': 2}); // set with value that is not new shouldn't fire change event
+        ok(a.get('foo') == 2, "Foo should NOT have changed, still 2");
+        ok(changeCount == 1, "Change count should NOT have incremented.");
+
+        a.validate = function (attrs) {
+            equal(attrs.foo, undefined, "don't ignore values when unsetting");
+        };
+        a.unset('foo');
+        equal(a.get('foo'), undefined, "Foo should have changed");
+        delete a.validate;
+        ok(changeCount == 2, "Change count should have incremented for unset.");
+
+        a.unset('id');
+        equal(a.id, undefined, "Unsetting the id should remove the id property.");
+    });
+
+    test("Model: multiple unsets", function () {
+        var i = 0, counter = function () { i++; }, model = new hydrogen.Model({a: 1});
+        model.bind("change:a", counter);
+        model.set({a: 2});
+        model.unset('a');
+        model.unset('a');
+        equal(i, 2, 'Unset does not fire an event for missing attributes.');
     });
 
     test("Model: using a non-default id attribute.", function () {

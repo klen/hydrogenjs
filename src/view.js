@@ -48,6 +48,10 @@
             },
 
             render: function () {
+                if (this.template && this.el) {
+                    var html = this.template.render(this.settings.values);
+                    this.el.html(html);
+                }
                 return this;
             },
 
