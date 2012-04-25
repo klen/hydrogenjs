@@ -52,7 +52,7 @@
             extend: function (name, proto) {
                 if (typeof name != 'string') {
                     proto = name;
-                    name = this.constructor.NAME;
+                    name = null;
                 }
                 return atom.declare({
                     parent: this,
