@@ -25,6 +25,8 @@
 
                 parent.previous.apply(this, arguments);
 
+                this.bindMethods('render');
+
                 this.setElement(this.el || atom.dom.create(this.tagName, this.attributes));
 
                 if (this.template !== null) {
