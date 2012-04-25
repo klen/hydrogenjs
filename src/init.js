@@ -49,9 +49,14 @@
     atom.declare('hydrogen.Base', {
 
         own: {
-            extend: function (proto) {
+            extend: function (name, proto) {
+                if (typeof name != 'string') {
+                    proto = name;
+                    name = this.constructor.NAME;
+                }
                 return atom.declare({
                     parent: this,
+                    name: name,
                     proto: proto || {}
                 });
             }

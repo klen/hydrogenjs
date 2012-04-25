@@ -57,7 +57,7 @@ atom.dom(function () {
 
     test("Collection: get with non-default ids", function () {
         var col = new hydrogen.Collection(),
-            MongoModel = hydrogen.Model.extend({
+            MongoModel = hydrogen.Model.extend('Model', {
                 idAttribute: '_id'
             }),
             model = new MongoModel({_id: 100});
@@ -308,7 +308,7 @@ atom.dom(function () {
     });
 
     test("Collection: initialize", function () {
-        var Collection = hydrogen.Collection.extend({
+        var Collection = hydrogen.Collection.extend('Collection', {
                 initialize: function () {
                     this.one = 1;
                 }
