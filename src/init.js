@@ -42,34 +42,36 @@
             escape: function (string) {
                 return (string.toString()).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;');
             }
-        }
+        },
+
+        prototype: {}
+
     });
 
 
     atom.declare('hydrogen.Base', {
 
         own: {
-            extend: function (name, proto) {
+            extend: function (name, prototype) {
                 if (typeof name != 'string') {
-                    proto = name;
+                    prototype = name;
                     name = null;
                 }
                 return atom.declare({
                     parent: this,
                     name: name,
-                    proto: proto || {}
+                    prototype: prototype || {}
                 });
             }
         },
 
-        proto: {
+        prototype: {
 
             properties: ['id'],
 
             initialize: function (settings) {
                 this.events = atom.Events(this);
-                this.settings = atom.Settings()
-                    .set(settings)
+                this.settings = atom.Settings(settings)
                     .addEvents(this.events);
                 this._configure();
             },

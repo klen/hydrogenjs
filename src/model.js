@@ -7,7 +7,7 @@
 
         parent: hydrogen.Base,
 
-        proto: {
+        prototype: {
 
             properties: ['collection'],
 

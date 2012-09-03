@@ -84,12 +84,12 @@
             extend: function (proto) {
                 return atom.declare({
                     parent: hydrogen.Router,
-                    proto: proto
+                    prototype: proto
                 });
             }
         },
 
-        proto: {
+        prototype: {
 
             properties: ['routes'],
 

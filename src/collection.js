@@ -7,7 +7,7 @@
 
         parent: hydrogen.Base,
 
-        proto: {
+        prototype: {
 
             properties: ['id', 'model', 'comparator', 'url'],
 

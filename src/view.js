@@ -9,7 +9,7 @@
 
         parent: hydrogen.Base,
 
-        proto: {
+        prototype: {
 
             properties: ['model', 'collection', 'el', 'id', 'attrs', 'className', 'tagName', 'template'],
 
