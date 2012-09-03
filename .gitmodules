@@ -1,0 +1,3 @@
+[submodule "vendor/atomjs"]
+	path = vendor/atomjs
+	url = git://github.com/theshock/atomjs.git
