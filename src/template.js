@@ -12,21 +12,25 @@
 
     atom.declare('hydrogen.Template', {
 
-        tmpl: null,
+        prototype: {
 
-        initialize: function (el, defaults) {
-            var elem = typeof el === 'string' ? atom.dom(el) : el,
-                str = elem.html();
+            tmpl: null,
 
-            this.defaults = defaults || {};
-            this.tmpl = this.constructor.compile(str);
-        },
+            initialize: function (el, defaults) {
+                var elem = typeof el === 'string' ? atom.dom(el) : el,
+                    str = elem.html();
 
-        render: function (data) {
-            var tmpl = this.tmpl || this.compile(),
-                context = atom.core.append(this.defaults, data || {});
+                this.defaults = defaults || {};
+                this.tmpl = this.constructor.compile(str);
+            },
 
-            return tmpl(data);
+            render: function (data) {
+                var tmpl = this.tmpl || this.compile(),
+                    context = atom.core.append(this.defaults, data || {});
+
+                return tmpl(data);
+            }
+
         },
 
         own: {

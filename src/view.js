@@ -5,79 +5,74 @@
 
     var eventSplitter = /^(\S+)\s*(.*)$/;
 
-    atom.declare('hydrogen.View', {
+    atom.declare('hydrogen.View', hydrogen.Base, {
 
-        parent: hydrogen.Base,
+        properties: ['model', 'collection', 'el', 'id', 'attrs', 'className', 'tagName', 'template'],
 
-        prototype: {
+        template: null,
 
-            properties: ['model', 'collection', 'el', 'id', 'attrs', 'className', 'tagName', 'template'],
+        tagName: 'div',
 
-            template: null,
+        attributes: {},
 
-            tagName: 'div',
+        actions: {},
 
-            attributes: {},
+        initialize: function parent(settings) {
 
-            actions: {},
+            parent.previous.apply(this, arguments);
 
-            initialize: function parent(settings) {
+            this.bindMethods('render');
 
-                parent.previous.apply(this, arguments);
+            this.setElement(this.el || atom.dom.create(this.tagName, this.attributes));
 
-                this.bindMethods('render');
+            if (this.template !== null) {
+                this.template = new hydrogen.Template(this.template);
+            }
 
-                this.setElement(this.el || atom.dom.create(this.tagName, this.attributes));
+            this.configure();
+        },
 
-                if (this.template !== null) {
-                    this.template = new hydrogen.Template(this.template);
-                }
+        configure: function () {
+            return this;
+        },
 
-                this.configure();
-            },
+        render: function () {
+            if (this.template && this.el) {
+                var html = this.template.render(this.settings.values);
+                this.el.html(html);
+            }
+            return this;
+        },
 
-            configure: function () {
-                return this;
-            },
+        destroy: function () {
+            this.el.destroy();
+            return this;
+        },
 
-            render: function () {
-                if (this.template && this.el) {
-                    var html = this.template.render(this.settings.values);
-                    this.el.html(html);
-                }
-                return this;
-            },
+        setElement: function (el) {
+            this.el = atom.dom(el);
+            this._bindEvents();
+        },
 
-            destroy: function () {
-                this.el.destroy();
-                return this;
-            },
+        find: function (selector) {
+            return this.el.find(selector);
+        },
 
-            setElement: function (el) {
-                this.el = atom.dom(el);
-                this._bindEvents();
-            },
-
-            find: function (selector) {
-                return this.el.find(selector);
-            },
-
-            /** @private */
-            _bindEvents: function () {
-                var method, key, match, name, selector,
-                    actions = this.actions;
-                for (key in actions) {
-                    method = actions[key];
-                    if (!atom.core.isFunction(method)) { method = this[actions[key]]; }
-                    if (!method) { continue; }
-                    match = key.match(eventSplitter);
-                    name = match[1];
-                    selector = match[2];
-                    if (selector === '') {
-                        this.el.bind(name, method.bind(this));
-                    } else {
-                        this.el.delegate(selector, name, method.bind(this));
-                    }
+        /** @private */
+        _bindEvents: function () {
+            var method, key, match, name, selector,
+                actions = this.actions;
+            for (key in actions) {
+                method = actions[key];
+                if (!atom.core.isFunction(method)) { method = this[actions[key]]; }
+                if (!method) { continue; }
+                match = key.match(eventSplitter);
+                name = match[1];
+                selector = match[2];
+                if (selector === '') {
+                    this.el.bind(name, method.bind(this));
+                } else {
+                    this.el.delegate(selector, name, method.bind(this));
                 }
             }
         }

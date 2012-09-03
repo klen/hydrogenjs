@@ -76,9 +76,7 @@
 
     hydrogen.history = new hydrogen._History();
 
-    atom.declare('hydrogen.Router', {
-
-        parent: hydrogen.Base,
+    atom.declare('hydrogen.Router', hydrogen.Base, {
 
         own: {
             extend: function (proto) {
