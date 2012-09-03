@@ -5,46 +5,6 @@
 
     atom.declare('hydrogen.Store', {
 
-        initialize: function (name) {
-            var store = localStorage.getItem(name);
-
-            this.name = name;
-            this.data = (store && JSON.parse(store)) || {};
-        },
-
-        save: function () {
-            localStorage.setItem(this.name, JSON.stringify(this.data));
-        },
-
-        create: function (model) {
-            if (!model.id) { model.set('id', this.constructor.guid(), {
-                silent: true
-            }); }
-            this.data[model.id] = model;
-            this.save();
-            return model.toJSON();
-        },
-
-        update: function (model) {
-            this.data[model.id] = model;
-            this.save();
-            return model.toJSON();
-        },
-
-        find: function (model) {
-            return this.data[model.id];
-        },
-
-        findAll: function () {
-            return Object.values(this.data);
-        },
-
-        destroy: function (model) {
-            delete this.data[model.id];
-            this.save();
-            return model;
-        },
-
         own: {
 
             S4: function () {
@@ -56,8 +16,51 @@
                 return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
             }
 
-        }
+        },
 
+        prototype: {
+
+            initialize: function (name) {
+                var store = localStorage.getItem(name);
+
+                this.name = name;
+                this.data = (store && JSON.parse(store)) || {};
+            },
+
+            save: function () {
+                localStorage.setItem(this.name, JSON.stringify(this.data));
+            },
+
+            create: function (model) {
+                if (!model.id) { model.set('id', this.constructor.guid(), {
+                    silent: true
+                }); }
+                this.data[model.id] = model;
+                this.save();
+                return model.toJSON();
+            },
+
+            update: function (model) {
+                this.data[model.id] = model;
+                this.save();
+                return model.toJSON();
+            },
+
+            find: function (model) {
+                return this.data[model.id];
+            },
+
+            findAll: function () {
+                return Object.values(this.data);
+            },
+
+            destroy: function (model) {
+                delete this.data[model.id];
+                this.save();
+                return model;
+            }
+
+        }
     });
 
     hydrogen.sync = function (method, model, options) {
@@ -85,6 +88,3 @@
         }
     };
 }());
-
-
-
